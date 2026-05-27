@@ -177,8 +177,7 @@
 </div>
 
 <script>
-// ★ Google Apps Script 웹앱 URL을 여기에 붙여넣으세요
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyEOnBYAjNx4ZNv7FrUlx4J1pIk8Pyj-pW4TI6JdpYPnm0rNeWCquTKf9BIJdhLzqgw/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbx62t29PZAkXV5cTScQEs9oYTl_iRHU4NP-Wl3j6OCEF9WZJWg4DbKTrR_mlRAQnuq-cg/exec";
 
 const CLASSES = {
   "믿음1반": { teacher: "신희정", students: ["임수아","황이담","신윤성","김시우"] },
@@ -352,10 +351,14 @@ function submitData() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spin">↻</span> 저장 중...';
 
-  fetch(GAS_URL, {
-    method: "POST",
-    body: JSON.stringify({ className: selectedClass, teacher: cls.teacher, month: selectedMonth, rows })
-  })
+  const params = new URLSearchParams({
+    className: selectedClass,
+    teacher: cls.teacher,
+    month: selectedMonth,
+    rows: JSON.stringify(rows)
+  });
+
+  fetch(GAS_URL + "?" + params.toString(), { method: "GET" })
   .then(r => r.json())
   .then(result => {
     if (result.status === "ok") {

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예꼬 칭찬스티커&큐티상</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: #f9f7f3; color: #1a1a1a; min-height: 100vh; }
+
+  .app-wrap { max-width: 600px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+  .app-header {
+    text-align: center; padding: 2rem 1rem 1.5rem;
+    margin-bottom: 1.5rem; border-bottom: 1px solid #e8e4dc;
+  }
+  .app-header .star-row { font-size: 22px; letter-spacing: 6px; margin-bottom: 10px; color: #E8A020; }
+  .app-header h1 { font-size: 24px; font-weight: 700; color: #1a1a1a; line-height: 1.3; }
+  .app-header p { font-size: 14px; color: #888; margin-top: 6px; }
+
+  .section-label {
+    font-size: 11px; font-weight: 700; color: #aaa;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+
+  /* 반 선택 */
+  .class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-bottom: 2rem; }
+  .class-btn {
+    padding: 12px 8px; border-radius: 10px; border: 1.5px solid #e0dcd4;
+    background: #fff; cursor: pointer; font-size: 14px; font-weight: 500;
+    color: #333; transition: all 0.15s; text-align: center; font-family: inherit;
+  }
+  .class-btn:hover { border-color: #E8A020; background: #fffbf2; }
+  .class-btn.active { border: 2px solid #E8A020; background: #FFF3D6; color: #854F0B; font-weight: 700; }
+
+  /* 월 선택 */
+  .month-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 1.5rem; }
+  .month-btn {
+    padding: 6px 14px; border-radius: 20px; border: 1.5px solid #e0dcd4;
+    background: #fff; cursor: pointer; font-size: 13px; color: #666;
+    transition: all 0.12s; font-family: inherit;
+  }
+  .month-btn:hover { border-color: #E8A020; color: #E8A020; }
+  .month-btn.active { background: #E8A020; border-color: #E8A020; color: #fff; font-weight: 700; }
+
+  /* 교사 배지 */
+  .teacher-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 20px;
+    background: #f3f0eb; border: 1px solid #e0dcd4;
+    font-size: 13px; color: #666; margin-bottom: 1rem;
+  }
+
+  /* 알림 */
+  .notice {
+    padding: 12px 14px; border-radius: 10px; border: 1.5px solid;
+    font-size: 13px; margin-bottom: 1rem; line-height: 1.5;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .notice.info { border-color: #b3d4f5; background: #eef6ff; color: #1a5fa8; }
+  .notice.success { border-color: #7dd3a8; background: #edfaf3; color: #166534; }
+  .notice.error { border-color: #f5b3b3; background: #fff0f0; color: #991b1b; }
+  .notice svg { flex-shrink: 0; margin-top: 1px; }
+
+  /* 학생 테이블 */
+  .student-table-wrap {
+    border: 1px solid #e0dcd4; border-radius: 12px;
+    overflow: hidden; margin-bottom: 1.5rem; background: #fff;
+  }
+  .student-table { width: 100%; border-collapse: collapse; }
+  .student-table th {
+    background: #f9f7f3; padding: 10px 14px; font-size: 12px; font-weight: 700;
+    color: #aaa; text-align: left; border-bottom: 1px solid #e0dcd4; letter-spacing: 0.04em;
+  }
+  .student-table th.center { text-align: center; }
+  .student-table td { padding: 10px 14px; border-bottom: 1px solid #f0ece4; vertical-align: middle; }
+  .student-table tr:last-child td { border-bottom: none; }
+  .student-table tr:hover td { background: #fffbf2; }
+  .student-name { font-size: 15px; font-weight: 500; color: #1a1a1a; }
+
+  /* 스티커 숫자 입력 */
+  .sticker-input {
+    width: 72px; padding: 7px 8px; border-radius: 8px;
+    border: 1.5px solid #e0dcd4; background: #fff;
+    font-size: 15px; text-align: center; color: #1a1a1a;
+    transition: border 0.12s; font-family: inherit;
+  }
+  .sticker-input:focus { outline: none; border: 2px solid #E8A020; background: #fffbf2; }
+  .sticker-input.error { border: 2px solid #e74c4c; background: #fff0f0; }
+
+  /* 큐티상 토글 */
+  .cutie-wrap { display: flex; justify-content: center; }
+  .cutie-toggle {
+    display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1.5px solid #e0dcd4; background: #fff;
+    cursor: pointer; font-size: 20px; transition: all 0.15s;
+    user-select: none;
+  }
+  .cutie-toggle:hover { border-color: #E8A020; background: #fffbf2; }
+  .cutie-toggle.on { background: #FFF3D6; border-color: #E8A020; transform: scale(1.1); }
+
+  /* 저장 버튼 */
+  .submit-btn {
+    width: 100%; padding: 15px; border-radius: 12px; border: none;
+    background: #E8A020; color: #fff; font-size: 16px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s, transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: inherit; box-shadow: 0 2px 8px rgba(232,160,32,0.25);
+  }
+  .submit-btn:hover { background: #CF8C18; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { background: #ddd; color: #aaa; cursor: not-allowed; box-shadow: none; }
+
+  .back-btn {
+    display: block; text-align: center; margin-top: 14px;
+    background: none; border: none; color: #aaa; font-size: 13px;
+    cursor: pointer; font-family: inherit;
+  }
+  .back-btn:hover { color: #666; }
+
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+
+  @media (max-width: 480px) {
+    .class-grid { grid-template-columns: repeat(3, 1fr); }
+    .sticker-input { width: 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="app-wrap">
+  <div class="app-header">
+    <div class="star-row">★ ★ ★</div>
+    <h1>예꼬 칭찬스티커&큐티상</h1>
+    <p>반을 선택하고 이번 달 기록을 입력해 주세요</p>
+  </div>
+
+  <!-- Step 1: 반 선택 -->
+  <div id="step1">
+    <div class="section-label">반 선택</div>
+    <div class="class-grid" id="classGrid"></div>
+  </div>
+
+  <!-- Step 2: 입력 -->
+  <div id="step2" style="display:none;">
+    <div class="section-label" style="margin-bottom:10px;">월 선택</div>
+    <div class="month-row" id="monthRow"></div>
+
+    <div id="teacherBadge" class="teacher-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span id="teacherName"></span>
+    </div>
+
+    <div id="noticeArea"></div>
+
+    <div class="student-table-wrap">
+      <table class="student-table">
+        <thead>
+          <tr>
+            <th>학생 이름</th>
+            <th class="center">칭찬스티커 갯수</th>
+            <th class="center">큐티상</th>
+          </tr>
+        </thead>
+        <tbody id="studentBody"></tbody>
+      </table>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitData()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      구글 시트에 저장하기
+    </button>
+    <button class="back-btn" onclick="resetToClassSelect()">← 반 다시 선택</button>
+  </div>
+</div>
+
+<script>
+// ★ Google Apps Script 웹앱 URL을 여기에 붙여넣으세요
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyEOnBYAjNx4ZNv7FrUlx4J1pIk8Pyj-pW4TI6JdpYPnm0rNeWCquTKf9BIJdhLzqgw/exec";
+
+const CLASSES = {
+  "믿음1반": { teacher: "신희정", students: ["임수아","황이담","신윤성","김시우"] },
+  "믿음2반": { teacher: "노필녀", students: ["윤지안","강예안","장온유"] },
+  "소망1반": { teacher: "유초선", students: ["김다현","이봄","최주하","손우주"] },
+  "소망2반": { teacher: "노연화", students: ["강온유","박채온","이태오","김아인","홍서안"] },
+  "소망3반": { teacher: "손지희", students: ["윤하언","김하윤","김하랑","김선우"] },
+  "소망4반": { teacher: "조솔지", students: ["임온유","신재인","김온봄","최재아","김준세"] },
+  "사랑1반": { teacher: "이의성", students: ["유시현","김우림","윤소은"] },
+  "사랑2반": { teacher: "김세련", students: ["강주안","유찬","김온유","홍윤열"] },
+  "은혜1반": { teacher: "김성희", students: ["김찬중","박도준","강민재","임사랑","여하율","박연하","김미우"] },
+  "은혜2반": { teacher: "이지혜", students: ["황이서","윤재온","임윤수","최재율","조이로","차희서","신시아"] }
+};
+const MONTHS = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+
+let selectedClass = null;
+let selectedMonth = null;
+const studentData = {};
+
+function init() {
+  // 반 버튼
+  const grid = document.getElementById("classGrid");
+  Object.keys(CLASSES).forEach(cls => {
+    const btn = document.createElement("button");
+    btn.className = "class-btn";
+    btn.textContent = cls;
+    btn.onclick = () => selectClass(cls, btn);
+    grid.appendChild(btn);
+  });
+
+  // 월 버튼
+  const monthRow = document.getElementById("monthRow");
+  MONTHS.forEach(m => {
+    const btn = document.createElement("button");
+    btn.className = "month-btn";
+    btn.textContent = m;
+    btn.onclick = () => selectMonth(m, btn);
+    monthRow.appendChild(btn);
+  });
+
+  // 현재 월 자동 선택
+  const curMonth = new Date().getMonth();
+  monthRow.querySelectorAll(".month-btn")[curMonth]?.click();
+}
+
+function selectClass(cls, btn) {
+  document.querySelectorAll(".class-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  selectedClass = cls;
+  document.getElementById("step2").style.display = "block";
+  document.getElementById("teacherName").textContent = CLASSES[cls].teacher + " 선생님";
+  renderStudents();
+  document.getElementById("step2").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function selectMonth(m, btn) {
+  document.querySelectorAll(".month-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  selectedMonth = m;
+  if (selectedClass) renderStudents();
+}
+
+function getKey() { return selectedClass + "_" + selectedMonth; }
+
+function renderStudents() {
+  if (!selectedClass || !selectedMonth) return;
+  const cls = CLASSES[selectedClass];
+  const key = getKey();
+  if (!studentData[key]) studentData[key] = {};
+
+  const tbody = document.getElementById("studentBody");
+  tbody.innerHTML = "";
+
+  cls.students.forEach(name => {
+    if (!studentData[key][name]) studentData[key][name] = { sticker: "", cutie: false };
+    const d = studentData[key][name];
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="student-name">${name}</span></td>
+      <td style="text-align:center;">
+        <input class="sticker-input" type="number" min="0" max="99" placeholder="0"
+          id="sticker_${name}" value="${d.sticker}"
+          oninput="updateSticker('${name}', this.value)"
+          onblur="validateSticker('${name}', this)">
+      </td>
+      <td>
+        <div class="cutie-wrap">
+          <button class="cutie-toggle ${d.cutie ? 'on' : ''}" onclick="toggleCutie('${name}')" id="cutie_${name}" title="큐티상 ${d.cutie ? '받음' : '미수여'}">
+            ${d.cutie ? '🌟' : '☆'}
+          </button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("noticeArea").innerHTML = `
+    <div class="notice info">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span><strong>${selectedClass} ${selectedMonth}</strong> 데이터를 입력해 주세요. 칭찬스티커 갯수는 반드시 입력해야 합니다.</span>
+    </div>`;
+}
+
+function updateSticker(name, val) {
+  const key = getKey();
+  if (!studentData[key][name]) studentData[key][name] = { sticker: "", cutie: false };
+  studentData[key][name].sticker = val;
+  document.getElementById("sticker_" + name)?.classList.remove("error");
+}
+
+function validateSticker(name, el) {
+  el.classList.toggle("error", el.value === "");
+}
+
+function toggleCutie(name) {
+  const key = getKey();
+  studentData[key][name].cutie = !studentData[key][name].cutie;
+  const btn = document.getElementById("cutie_" + name);
+  btn.classList.toggle("on");
+  btn.textContent = studentData[key][name].cutie ? "🌟" : "☆";
+  btn.title = "큐티상 " + (studentData[key][name].cutie ? "받음" : "미수여");
+}
+
+function resetToClassSelect() {
+  selectedClass = null;
+  document.querySelectorAll(".class-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("step2").style.display = "none";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function submitData() {
+  if (!selectedClass || !selectedMonth) return;
+  const key = getKey();
+  const data = studentData[key] || {};
+  const cls = CLASSES[selectedClass];
+  let hasError = false;
+
+  cls.students.forEach(name => {
+    const el = document.getElementById("sticker_" + name);
+    if (!el || el.value === "") {
+      if (el) el.classList.add("error");
+      hasError = true;
+    }
+  });
+
+  if (hasError) {
+    document.getElementById("noticeArea").innerHTML = `
+      <div class="notice error">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>칭찬스티커 갯수를 모두 입력해 주세요. 빈 칸은 허용되지 않습니다.</span>
+      </div>`;
+    return;
+  }
+
+  if (GAS_URL === "YOUR_GAS_WEBAPP_URL_HERE") {
+    document.getElementById("noticeArea").innerHTML = `
+      <div class="notice info">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Google Apps Script URL이 아직 설정되지 않았어요. HTML 파일 상단의 GAS_URL을 수정해 주세요.</span>
+      </div>`;
+    return;
+  }
+
+  const rows = cls.students.map(name => ({
+    name,
+    sticker: Number(data[name]?.sticker ?? 0),
+    cutie: data[name]?.cutie ?? false
+  }));
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">↻</span> 저장 중...';
+
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify({ className: selectedClass, teacher: cls.teacher, month: selectedMonth, rows })
+  })
+  .then(r => r.json())
+  .then(result => {
+    if (result.status === "ok") {
+      document.getElementById("noticeArea").innerHTML = `
+        <div class="notice success">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span><strong>${selectedClass} ${selectedMonth}</strong> 데이터가 구글 시트에 저장되었습니다! ✨</span>
+        </div>`;
+    } else { throw new Error(result.message || "저장 실패"); }
+  })
+  .catch(e => {
+    document.getElementById("noticeArea").innerHTML = `
+      <div class="notice error">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>저장 중 오류가 발생했습니다: ${e.message}</span>
+      </div>`;
+  })
+  .finally(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg> 구글 시트에 저장하기';
+  });
+}
+
+init();
+</script>
+</body>
+</html>

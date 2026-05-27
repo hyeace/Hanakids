@@ -270,7 +270,7 @@ function renderStudents() {
   tbody.innerHTML = "";
 
   cls.students.forEach(name => {
-    if (!studentData[key][name]) studentData[key][name] = { sticker: "", cutie: false };
+    if (!studentData[key][name]) studentData[key][name] = { sticker: "0", cutie: false };
     const d = studentData[key][name];
 
     const tr = document.createElement("tr");
@@ -301,13 +301,13 @@ function renderStudents() {
 
 function updateSticker(name, val) {
   const key = getKey();
-  if (!studentData[key][name]) studentData[key][name] = { sticker: "", cutie: false };
+  if (!studentData[key][name]) studentData[key][name] = { sticker: "0", cutie: false };
   studentData[key][name].sticker = val;
   document.getElementById("sticker_" + name)?.classList.remove("error");
 }
 
 function validateSticker(name, el) {
-  el.classList.toggle("error", el.value === "");
+  el.classList.remove("error");
 }
 
 function toggleCutie(name) {
@@ -331,30 +331,15 @@ function submitData() {
   const key = getKey();
   const data = studentData[key] || {};
   const cls = CLASSES[selectedClass];
-  let hasError = false;
-
-  cls.students.forEach(name => {
+  const rows = cls.students.map(name => {
     const el = document.getElementById("sticker_" + name);
-    if (!el || el.value === "") {
-      if (el) el.classList.add("error");
-      hasError = true;
-    }
+    const stickerVal = el && el.value !== "" ? Number(el.value) : Number(data[name]?.sticker ?? 0);
+    return {
+      name,
+      sticker: stickerVal,
+      cutie: data[name]?.cutie ?? false
+    };
   });
-
-  if (hasError) {
-    document.getElementById("noticeArea").innerHTML = `
-      <div class="notice error">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>칭찬스티커 갯수를 모두 입력해 주세요. 빈 칸은 허용되지 않습니다.</span>
-      </div>`;
-    return;
-  }
-
-  const rows = cls.students.map(name => ({
-    name,
-    sticker: Number(data[name]?.sticker ?? 0),
-    cutie: data[name]?.cutie ?? false
-  }));
 
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;

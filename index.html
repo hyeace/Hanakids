@@ -247,7 +247,7 @@ function selectClass(cls, btn) {
   selectedClass = cls;
   document.getElementById("step2").style.display = "block";
   document.getElementById("teacherName").textContent = CLASSES[cls].teacher + " 선생님";
-  renderStudents();
+  loadAndRender();
   document.getElementById("step2").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -255,16 +255,27 @@ function selectMonth(m, btn) {
   document.querySelectorAll(".month-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   selectedMonth = m;
-  if (selectedClass) renderStudents();
+  if (selectedClass) loadAndRender();
 }
 
 function getKey() { return selectedClass + "_" + selectedMonth; }
 
-function renderStudents() {
+function renderStudents(loadedData) {
   if (!selectedClass || !selectedMonth) return;
   const cls = CLASSES[selectedClass];
   const key = getKey();
   if (!studentData[key]) studentData[key] = {};
+
+  // 시트에서 불러온 데이터가 있으면 반영
+  if (loadedData) {
+    cls.students.forEach(name => {
+      if (loadedData[name]) {
+        studentData[key][name] = loadedData[name];
+      } else {
+        if (!studentData[key][name]) studentData[key][name] = { sticker: "0", cutie: false };
+      }
+    });
+  }
 
   const tbody = document.getElementById("studentBody");
   tbody.innerHTML = "";
@@ -295,8 +306,46 @@ function renderStudents() {
   document.getElementById("noticeArea").innerHTML = `
     <div class="notice info">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <span><strong>${selectedClass} ${selectedMonth}</strong> 데이터를 입력해 주세요. 칭찬스티커 갯수는 반드시 입력해야 합니다.</span>
+      <span><strong>${selectedClass} ${selectedMonth}</strong> 이전에 입력된 데이터를 불러왔습니다. 수정 후 저장하세요.</span>
     </div>`;
+}
+
+function loadAndRender() {
+  if (!selectedClass || !selectedMonth) return;
+  const key = getKey();
+
+  // 이미 이번 세션에서 불러온 적 있으면 API 호출 안 함
+  if (studentData[key] && studentData[key]._loaded) {
+    renderStudents(null);
+    return;
+  }
+
+  // 로딩 표시
+  document.getElementById("studentBody").innerHTML = `
+    <tr><td colspan="3" style="text-align:center; padding:24px; color:#7c3aed; font-size:20px;">
+      <span style="display:inline-block; animation:spin 0.8s linear infinite;">↻</span>
+      &nbsp;데이터 불러오는 중...
+    </td></tr>`;
+  document.getElementById("noticeArea").innerHTML = "";
+
+  const params = new URLSearchParams({
+    action: "read",
+    className: selectedClass,
+    month: selectedMonth
+  });
+
+  fetch(GAS_URL + "?" + params.toString())
+    .then(r => r.json())
+    .then(result => {
+      if (result.status === "ok") {
+        if (!studentData[key]) studentData[key] = {};
+        studentData[key]._loaded = true;
+        renderStudents(result.data);
+      } else {
+        renderStudents(null);
+      }
+    })
+    .catch(() => renderStudents(null));
 }
 
 function updateSticker(name, val) {
